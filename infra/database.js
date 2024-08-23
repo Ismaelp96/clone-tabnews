@@ -28,10 +28,9 @@ async function getNetClient() {
   return client;
 }
 
-export default {
-  query,
-  getNetClient,
-};
+const database = { query, getNetClient };
+
+export default database;
 
 function getSSlValues() {
   if (process.env.POSTGRES_CA) {
