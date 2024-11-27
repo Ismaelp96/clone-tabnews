@@ -3,7 +3,6 @@ import useSWR from "swr";
 async function fetchAPI(key) {
   const response = await fetch(key);
   const responseBody = await response.json();
-
   return responseBody;
 }
 
@@ -39,18 +38,18 @@ function Database() {
     refreshInterval: 2000,
   });
 
-  const dbVersion = data.dependencies.database.version;
-  const maxConnections = data.dependencies.database.max_connections;
-  const openedConnections = data.dependencies.database.opened_connections;
-
   let databaseStatusInformation = "Carregando...";
 
   if (!isLoading && data) {
     databaseStatusInformation = (
       <ul>
-        <li>Versão do banco de dados: {dbVersion}</li>
-        <li>Máximo de conexões: {maxConnections}</li>
-        <li>Conexões em aberto: {openedConnections}</li>
+        <li>Versão: {data.dependencies.database.version}</li>
+        <li>
+          Máximo de conexões: {data.dependencies.database.max_connections}
+        </li>
+        <li>
+          Conexões em aberto: {data.dependencies.database.opened_connections}
+        </li>
       </ul>
     );
   }
