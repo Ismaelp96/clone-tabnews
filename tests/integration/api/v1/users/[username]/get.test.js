@@ -15,7 +15,6 @@ describe("GET api/v1/users/[username]", () => {
         headers: {
           "Content-Type": "application/json",
         },
-
         body: JSON.stringify({
           username: "MesmoCase",
           email: "mesmo.case@curso.dev",
@@ -27,9 +26,7 @@ describe("GET api/v1/users/[username]", () => {
       const response2 = await fetch(
         "http://localhost:3000/api/v1/users/MesmoCase",
       );
-
       expect(response2.status).toBe(200);
-
       const response2Body = await response2.json();
       expect(response2Body).toEqual({
         id: response2Body.id,
@@ -50,7 +47,6 @@ describe("GET api/v1/users/[username]", () => {
         headers: {
           "Content-Type": "application/json",
         },
-
         body: JSON.stringify({
           username: "CaseDiferente",
           email: "case.diferente@curso.dev",
@@ -62,9 +58,7 @@ describe("GET api/v1/users/[username]", () => {
       const response2 = await fetch(
         "http://localhost:3000/api/v1/users/casediferente",
       );
-
       expect(response2.status).toBe(200);
-
       const response2Body = await response2.json();
       expect(response2Body).toEqual({
         id: response2Body.id,
@@ -83,9 +77,7 @@ describe("GET api/v1/users/[username]", () => {
       const response = await fetch(
         "http://localhost:3000/api/v1/users/UsuarioInexistente",
       );
-
       expect(response.status).toBe(404);
-
       const responseBody = await response.json();
       expect(responseBody).toEqual({
         name: "NotFoundError",
