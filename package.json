@@ -20,6 +20,9 @@
     "prepare": "husky",
     "commit": "cz"
   },
+  "engines": {
+    "node": "22.x"
+  },
   "author": "Jamas",
   "license": "MIT",
   "dependencies": {
