@@ -5,6 +5,28 @@ import { UnauthorizedError } from "infra/errors";
 
 const EXPIRATION_IN_MILLISECONS = 60 * 60 * 24 * 30 * 1000;
 
+async function create(userId) {
+  const token = crypto.randomBytes(48).toString("hex");
+  const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILLISECONS);
+  const newSession = await runInsertQuery(token, userId, expiresAt);
+  return newSession;
+
+  async function runInsertQuery(token, userId, expiresAt) {
+    const results = await database.query({
+      text: `
+        INSERT INTO
+          sessions (token, user_id, expires_at)
+        VALUES
+          ($1, $2, $3)
+        RETURNING
+          *
+      ;`,
+      values: [token, userId, expiresAt],
+    });
+    return results.rows[0];
+  }
+}
+
 async function findOneValidByToken(sessionToken) {
   const sessionFound = await runSelectQuery(sessionToken);
 
@@ -35,24 +57,28 @@ async function findOneValidByToken(sessionToken) {
   }
 }
 
-async function create(userId) {
-  const token = crypto.randomBytes(48).toString("hex");
+async function renew(sessionId) {
   const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILLISECONS);
-  const newSession = await runInsertQuery(token, userId, expiresAt);
-  return newSession;
 
-  async function runInsertQuery(token, userId, expiresAt) {
+  const renewdSessionObject = reunUpdateQuery(sessionId, expiresAt);
+  return renewdSessionObject;
+
+  async function reunUpdateQuery(sessionId, expiresAt) {
     const results = await database.query({
       text: `
-        INSERT INTO
-          sessions (token, user_id, expires_at)
-        VALUES
-          ($1, $2, $3)
+        UPDATE
+          sessions
+        SET
+          expires_at = $2,
+          updated_at = NOW()
+        WHERE
+          id = $1
         RETURNING
           *
-      ;`,
-      values: [token, userId, expiresAt],
+        ;`,
+      values: [sessionId, expiresAt],
     });
+
     return results.rows[0];
   }
 }
@@ -61,6 +87,7 @@ const session = {
   create,
   EXPIRATION_IN_MILLISECONS,
   findOneValidByToken,
+  renew,
 };
 
 export default session;

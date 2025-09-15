@@ -1,4 +1,5 @@
 import { version as uuidVersion } from "uuid";
+import setCookieParser from "set-cookie-parser";
 
 import session from "models/session.js";
 import orchestrator from "tests/orchestrator.js";
@@ -40,7 +41,31 @@ describe("GET /api/v1/user", () => {
       expect(uuidVersion(responseBody.id)).toBe(4);
       expect(Date.parse(responseBody.created_at)).not.toBeNaN();
       expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
+
+      // Session renewal assertions
+      const renewedSessionObject = await session.findOneValidByToken(
+        sessionObject.token,
+      );
+      expect(
+        renewedSessionObject.expires_at > sessionObject.expires_at,
+      ).toEqual(true);
+      expect(
+        renewedSessionObject.updated_at > sessionObject.updated_at,
+      ).toEqual(true);
+
+      // Set-Cookie assertions
+      const parsedSetCookie = setCookieParser(response, {
+        map: true,
+      });
+      expect(parsedSetCookie.session_id).toEqual({
+        name: "session_id",
+        value: sessionObject.token,
+        maxAge: session.EXPIRATION_IN_MILLISECONS / 1000,
+        path: "/",
+        httpOnly: true,
+      });
     });
+
     test("With noexistent session", async () => {
       const noexistentToken =
         "bff56038aa165e27db0a67d3a1f44afe472c6d4eb539172d0481cb66ec0d44e1123a687f3b082ee344e94291c2c1129d";
