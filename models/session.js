@@ -3,11 +3,11 @@ import crypto from "node:crypto";
 import database from "infra/database.js";
 import { UnauthorizedError } from "infra/errors";
 
-const EXPIRATION_IN_MILLISECONS = 60 * 60 * 24 * 30 * 1000;
+const EXPIRATION_IN_MILLISECONDS = 60 * 60 * 24 * 30 * 1000;
 
 async function create(userId) {
   const token = crypto.randomBytes(48).toString("hex");
-  const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILLISECONS);
+  const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILLISECONDS);
   const newSession = await runInsertQuery(token, userId, expiresAt);
   return newSession;
 
@@ -58,9 +58,9 @@ async function findOneValidByToken(sessionToken) {
 }
 
 async function renew(sessionId) {
-  const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILLISECONS);
+  const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILLISECONDS);
 
-  const renewdSessionObject = reunUpdateQuery(sessionId, expiresAt);
+  const renewdSessionObject = await reunUpdateQuery(sessionId, expiresAt);
   return renewdSessionObject;
 
   async function reunUpdateQuery(sessionId, expiresAt) {
@@ -85,7 +85,7 @@ async function renew(sessionId) {
 
 const session = {
   create,
-  EXPIRATION_IN_MILLISECONS,
+  EXPIRATION_IN_MILLISECONDS,
   findOneValidByToken,
   renew,
 };
