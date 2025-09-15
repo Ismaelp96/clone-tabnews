@@ -11,7 +11,7 @@ describe("GET api/v1/status", () => {
       expect(response.status).toBe(200);
 
       const responseBody = await response.json();
-      console.log(responseBody);
+
       expect(responseBody.updated_at).toBeDefined();
 
       const parseUpdatedAt = new Date(responseBody.updated_at).toISOString();
