@@ -3,7 +3,7 @@ import retry from "async-retry";
 
 import database from "infra/database.js";
 import migrator from "models/migrator.js";
-import session from "models/session";
+import session from "models/session.js";
 import user from "models/user.js";
 
 async function waitForAllServices() {
@@ -35,11 +35,12 @@ async function runPendingMigrations() {
 async function createUser(userObject) {
   return await user.create({
     username:
-      userObject.username || faker.internet.username().replace(/[_.-]/g, ""),
-    email: userObject.email || faker.internet.email(),
-    password: userObject.password || "validpassword",
+      userObject?.username || faker.internet.username().replace(/[_.-]/g, ""),
+    email: userObject?.email || faker.internet.email(),
+    password: userObject?.password || "validpassword",
   });
 }
+
 async function createSession(userId) {
   return await session.create(userId);
 }

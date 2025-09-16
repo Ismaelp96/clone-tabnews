@@ -93,7 +93,7 @@ async function expireById(sessionId) {
         UPDATE
           sessions
         SET
-          expires_at = expires_at - interval '1 year'
+          expires_at = expires_at - interval '1 year',
           updated_at = NOW()
         WHERE
           id = $1
