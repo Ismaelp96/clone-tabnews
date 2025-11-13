@@ -9,7 +9,8 @@ import {
   NotFoundError,
   UnauthorizedError,
   ForbiddenError,
-} from "infra/errors";
+} from "infra/errors.js";
+import authorization from "models/authorization.js";
 
 function onNoMatchHandler(request, response) {
   const publicErrorObject = new MethodNotAllowedError();
@@ -33,8 +34,6 @@ function onErrorHandler(error, request, response) {
   const publicErrorObject = new InternalServerError({
     cause: error,
   });
-
-  console.log(publicErrorObject);
 
   response.status(publicErrorObject.statusCode).json(publicErrorObject);
 }
@@ -96,7 +95,7 @@ function canRequest(feature) {
   return function canRequestMiddleware(request, response, next) {
     const userTryingToRequest = request.context.user;
 
-    if (userTryingToRequest.features.includes(feature)) {
+    if (authorization.can(userTryingToRequest, feature)) {
       return next();
     }
 
