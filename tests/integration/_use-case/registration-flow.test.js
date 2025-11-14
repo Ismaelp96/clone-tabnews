@@ -51,17 +51,17 @@ describe("Use case: Registration flow (all successful)", () => {
     expect(lastEmail.subject).toBe("Ative seu cadastro no FinTab!");
     expect(lastEmail.text).toContain("RegistrationFlow");
 
-    activationTokenId = orchestrator.extractUUID(lastEmail.text);
+    activationTokenId = await orchestrator.extractUUID(lastEmail.text);
 
     expect(lastEmail.text).toContain(
       `${webserver.origin}/cadastro/ativar/${activationTokenId}`,
     );
 
-    const activationTOkenObject =
+    const activationTokenObject =
       await activation.findOneValidById(activationTokenId);
 
-    expect(activationTOkenObject.user_id).toBe(createUserResponseBody.id);
-    expect(activationTOkenObject.used_at).toBe(null);
+    expect(activationTokenObject.user_id).toBe(createUserResponseBody.id);
+    expect(activationTokenObject.used_at).toBe(null);
   });
   test("Activate account", async () => {
     const activationResponse = await fetch(
