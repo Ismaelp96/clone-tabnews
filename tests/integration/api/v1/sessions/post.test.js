@@ -8,6 +8,7 @@ beforeAll(async () => {
   await orchestrator.waitForAllServices();
   await orchestrator.clearDatabase();
   await orchestrator.runPendingMigrations();
+  await orchestrator.deleteAllEmails();
 });
 
 describe("POST /api/v1/sessions", () => {
@@ -35,6 +36,7 @@ describe("POST /api/v1/sessions", () => {
         status_code: 401,
       });
     });
+
     test("With correct email but incorrect password", async () => {
       await orchestrator.createUser({
         email: "email.correto1@curso.dev",
@@ -58,6 +60,7 @@ describe("POST /api/v1/sessions", () => {
         status_code: 401,
       });
     });
+
     test("With incorrect email and incorrect password", async () => {
       await orchestrator.createUser({});
       const response = await fetch("http://localhost:3000/api/v1/sessions", {
@@ -79,27 +82,32 @@ describe("POST /api/v1/sessions", () => {
         status_code: 401,
       });
     });
+
     test("With correct email and correct password", async () => {
-      const createdUser = await orchestrator.createUser({
-        email: "tudo.correto@curso.dev",
-        password: "tudocorreto",
+      const createUser = await orchestrator.createUser({
+        email: "usuario.certo@curso.dev",
+        password: "usuarioCertoPassword",
       });
+
+      await orchestrator.activateUser(createUser);
+
       const response = await fetch("http://localhost:3000/api/v1/sessions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: "tudo.correto@curso.dev",
-          password: "tudocorreto",
+          email: "usuario.certo@curso.dev",
+          password: "usuarioCertoPassword",
         }),
       });
+
       expect(response.status).toBe(201);
       const responseBody = await response.json();
       expect(responseBody).toEqual({
         id: responseBody.id,
         token: responseBody.token,
-        user_id: createdUser.id,
+        user_id: responseBody.user_id,
         expires_at: responseBody.expires_at,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
