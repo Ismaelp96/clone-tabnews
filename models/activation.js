@@ -1,13 +1,14 @@
 import database from "infra/database.js";
 import email from "infra/email.js";
-import { NotFoundError } from "infra/errors.js";
+import { ForbiddenError, NotFoundError } from "infra/errors.js";
 import webserver from "infra/webserver.js";
 import user from "./user.js";
+import authorization from "./authorization.js";
 
-const EXPIRATION_IN_MILISECONDS = 60 * 15 * 1000; // 15 min
+const EXPIRATION_IN_MILLISECONDS = 60 * 15 * 1000;
 
 async function create(userId) {
-  const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILISECONDS);
+  const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILLISECONDS);
   const newToken = await runInsertQuery(userId, expiresAt);
 
   return newToken;
@@ -64,7 +65,7 @@ async function sendEmailToUser(user, activationToken) {
     from: "FinTab <contato@fintab.com.br>",
     to: user.email,
     subject: "Ative seu cadastro no FinTab!",
-    text: `${user.username}, clique no link abaixo para atvar seu cadastro no FinTab:
+    text: `${user.username}, clique no link abaixo para ativar seu cadastro no FinTab:
 
 ${webserver.origin}/cadastro/ativar/${activationToken.id}
 
@@ -72,11 +73,37 @@ atenciosamente, Equipe FinTab!`,
   });
 }
 
-async function markTokenAsUsed(activatationTokenId) {
-  const usedActivationToken = await runUpdateQuery(activatationTokenId);
+async function activateUserByUserId(userId) {
+  const userToActivate = await user.findOneById(userId);
+
+  if (!userToActivate) {
+    throw new NotFoundError({
+      message: "Usuário não encontrado.",
+      action: "Verifique o ID do usuário.",
+    });
+  }
+
+  if (!authorization.can(userToActivate, "read:activation_token")) {
+    throw new ForbiddenError({
+      message: "Você não pode mais utilizar tokens de ativação.",
+      action: "Entre em contato com o suporte.",
+    });
+  }
+
+  const activatedUser = await user.setFeatures(userId, [
+    "create:session",
+    "read:session",
+  ]);
+
+  return activatedUser;
+}
+
+async function markTokenAsUsed(activationTokenId) {
+  const usedActivationToken = await runUpdateQuery(activationTokenId);
+
   return usedActivationToken;
 
-  async function runUpdateQuery(activatationTokenId) {
+  async function runUpdateQuery(activationTokenId) {
     const results = await database.query({
       text: `
         UPDATE
@@ -89,15 +116,10 @@ async function markTokenAsUsed(activatationTokenId) {
         RETURNING
           *
       ;`,
-      values: [activatationTokenId],
+      values: [activationTokenId],
     });
     return results.rows[0];
   }
-}
-
-async function activateUserByUserId(userId) {
-  const activatedUser = await user.setFeatures(userId, ["create:session"]);
-  return activatedUser;
 }
 
 const activation = {
@@ -106,6 +128,7 @@ const activation = {
   sendEmailToUser,
   markTokenAsUsed,
   activateUserByUserId,
+  EXPIRATION_IN_MILLISECONDS,
 };
 
 export default activation;
