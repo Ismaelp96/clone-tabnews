@@ -10,6 +10,11 @@ import user from "models/user.js";
 
 const emailHttpUrl = `http://${process.env.EMAIL_HTTP_HOST}:${process.env.EMAIL_HTTP_PORT}`;
 
+function extractUUID(text) {
+  const match = text.match(/[0-9a-fA-F-]{36}/);
+  return match ? match[0] : null;
+}
+
 async function waitForAllServices() {
   await waitForWebServer();
   await waitForEmailServer();
@@ -87,11 +92,6 @@ async function getLastEmail() {
   const emailTextBody = await emailTextResponse.text();
   lastEmailItem.text = emailTextBody;
   return lastEmailItem;
-}
-
-function extractUUID(text) {
-  const match = text.match(/[0-9a-fA-F-]{36}/);
-  return match ? match[0] : null;
 }
 
 async function activateUser(inactiveUser) {
