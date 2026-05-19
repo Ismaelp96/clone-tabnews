@@ -1,9 +1,8 @@
 import { createRouter } from "next-connect";
-
 import controller from "infra/controller.js";
 import { ForbiddenError } from "infra/errors.js";
 import user from "models/user.js";
-import authorization from "models/authorization";
+import authorization from "models/authorization.js";
 
 const router = createRouter();
 router.use(controller.injectAnonymousOrUser);
