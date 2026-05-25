@@ -4,7 +4,7 @@ beforeAll(async () => {
   await orchestrator.waitForAllServices();
 });
 
-describe("GET api/v1/status", () => {
+describe("GET /api/v1/status", () => {
   describe("Anonymous user", () => {
     test("Retrieving current system status", async () => {
       const response = await fetch("http://localhost:3000/api/v1/status");
@@ -12,8 +12,8 @@ describe("GET api/v1/status", () => {
 
       const responseBody = await response.json();
 
-      const parseUpdatedAt = new Date(responseBody.updated_at).toISOString();
-      expect(responseBody.updated_at).toEqual(parseUpdatedAt);
+      const parsedUpdatedAt = new Date(responseBody.updated_at).toISOString();
+      expect(responseBody.updated_at).toEqual(parsedUpdatedAt);
 
       expect(responseBody.dependencies.database.max_connections).toEqual(100);
       expect(responseBody.dependencies.database.opened_connections).toEqual(1);
@@ -27,23 +27,21 @@ describe("GET api/v1/status", () => {
       const activatedPrivilegedUser =
         await orchestrator.activateUser(privilegedUser);
       await orchestrator.addFeaturesToUser(privilegedUser, ["read:status:all"]);
-      const privilegedUserSessionObject = await orchestrator.createSession(
+      const privilegedUserSession = await orchestrator.createSession(
         activatedPrivilegedUser.id,
       );
-      const response = await fetch(
-        "http://localhost:3000/api/v1/status" <
-          {
-            headers: {
-              Cookie: `session_id=${privilegedUserSessionObject.token}`,
-            },
-          },
-      );
+
+      const response = await fetch("http://localhost:3000/api/v1/status", {
+        headers: {
+          Cookie: `session_id=${privilegedUserSession.token}`,
+        },
+      });
       expect(response.status).toBe(200);
 
       const responseBody = await response.json();
 
-      const parseUpdatedAt = new Date(responseBody.updated_at).toISOString();
-      expect(responseBody.updated_at).toEqual(parseUpdatedAt);
+      const parsedUpdatedAt = new Date(responseBody.updated_at).toISOString();
+      expect(responseBody.updated_at).toEqual(parsedUpdatedAt);
 
       expect(responseBody.dependencies.database.version).toEqual("16.0");
       expect(responseBody.dependencies.database.max_connections).toEqual(100);

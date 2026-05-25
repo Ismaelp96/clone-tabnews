@@ -25,9 +25,7 @@ async function getHandler(request, response) {
 
 async function patchHandler(request, response) {
   const username = request.query.username;
-
   const userInputValues = request.body;
-
   const userTringToPatch = request.context.user;
   const targetUser = await user.findOneByUsername(username);
 

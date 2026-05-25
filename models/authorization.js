@@ -1,16 +1,25 @@
 import { InternalServerError } from "infra/errors.js";
 
 const availableFeatures = [
+  // USER
   "create:user",
   "read:user",
   "read:user:self",
   "update:user",
-  "update:others",
+  "update:user:others",
+
+  // SESSION
   "create:session",
   "read:session",
+
+  // ACTIVATION_TOKEN
   "read:activation_token",
+
+  // MIGRATION
   "create:migration",
   "read:migration",
+
+  // STATUS
   "read:status",
   "read:status:all",
 ];
@@ -95,9 +104,10 @@ function filterOutput(user, feature, resource) {
       };
     });
   }
+
   if (feature === "read:status") {
     const output = {
-      updated_at: resource.updateAt,
+      updated_at: resource.updated_at,
       dependencies: {
         database: {
           max_connections: resource.dependencies.database.max_connections,
@@ -134,7 +144,7 @@ function validateResource(resource) {
   if (!resource) {
     throw new InternalServerError({
       cause:
-        "É necessário fornecer um `resource` em `authorization.filterOutput`.",
+        "É necessário fornecer um `resource` em `authorization.filterOutput()`.",
     });
   }
 }
