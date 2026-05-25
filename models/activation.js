@@ -5,29 +5,7 @@ import webserver from "infra/webserver.js";
 import user from "./user.js";
 import authorization from "./authorization.js";
 
-const EXPIRATION_IN_MILLISECONDS = 60 * 15 * 1000;
-
-async function create(userId) {
-  const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILLISECONDS);
-  const newToken = await runInsertQuery(userId, expiresAt);
-
-  return newToken;
-
-  async function runInsertQuery(userId, expiresAt) {
-    const results = await database.query({
-      text: `
-      INSERT INTO
-        user_activation_tokens (user_id, expires_at)
-      VALUES
-        ($1, $2)
-      RETURNING
-        *
-        ;`,
-      values: [userId, expiresAt],
-    });
-    return results.rows[0];
-  }
-}
+const EXPIRATION_IN_MILLISECONDS = 60 * 15 * 1000; // 15min
 
 async function findOneValidById(tokenId) {
   const activationTokenObject = await runSelectQuery(tokenId);
@@ -60,17 +38,50 @@ async function findOneValidById(tokenId) {
   }
 }
 
-async function sendEmailToUser(user, activationToken) {
-  await email.send({
-    from: "FinTab <contato@fintab.com.br>",
-    to: user.email,
-    subject: "Ative seu cadastro no FinTab!",
-    text: `${user.username}, clique no link abaixo para ativar seu cadastro no FinTab:
+async function create(userId) {
+  const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILLISECONDS);
 
-${webserver.origin}/cadastro/ativar/${activationToken.id}
+  const newToken = await runInsertQuery(userId, expiresAt);
+  return newToken;
 
-atenciosamente, Equipe FinTab!`,
-  });
+  async function runInsertQuery(userId, expiresAt) {
+    const results = await database.query({
+      text: `
+        INSERT INTO
+          user_activation_tokens (user_id, expires_at)
+        VALUES
+          ($1, $2)
+        RETURNING
+          *
+      ;`,
+      values: [userId, expiresAt],
+    });
+
+    return results.rows[0];
+  }
+}
+
+async function markTokenAsUsed(activationTokenId) {
+  const usedActivationToken = await runUpdateQuery(activationTokenId);
+  return usedActivationToken;
+
+  async function runUpdateQuery(activationTokenId) {
+    const results = await database.query({
+      text: `
+        UPDATE
+          user_activation_tokens
+        SET
+          used_at = timezone('UTC', now()),
+          updated_at = timezone('UTC', now())
+        WHERE
+          id = $1
+        RETURNING
+          *
+      ;`,
+      values: [activationTokenId],
+    });
+    return results.rows[0];
+  }
 }
 
 async function activateUserByUserId(userId) {
@@ -93,33 +104,24 @@ async function activateUserByUserId(userId) {
   const activatedUser = await user.setFeatures(userId, [
     "create:session",
     "read:session",
+    "update:user",
   ]);
 
   return activatedUser;
 }
 
-async function markTokenAsUsed(activationTokenId) {
-  const usedActivationToken = await runUpdateQuery(activationTokenId);
+async function sendEmailToUser(user, activationToken) {
+  await email.send({
+    from: "FinTab <contato@fintab.com.br>",
+    to: user.email,
+    subject: "Ative seu cadastro no FinTab!",
+    text: `${user.username}, clique no link abaixo para ativar seu cadastro no FinTab:
 
-  return usedActivationToken;
+${webserver.origin}/cadastro/ativar/${activationToken.id}
 
-  async function runUpdateQuery(activationTokenId) {
-    const results = await database.query({
-      text: `
-        UPDATE
-          user_activation_tokens
-        SET
-          used_at = timezone('UTC', now()),
-          updated_at = timezone('UTC', now())
-        WHERE
-          id = $1
-        RETURNING
-          *
-      ;`,
-      values: [activationTokenId],
-    });
-    return results.rows[0];
-  }
+Atenciosamente,
+Equipe FinTab`,
+  });
 }
 
 const activation = {

@@ -1,5 +1,4 @@
 import * as cookie from "cookie";
-
 import user from "models/user.js";
 import session from "models/session.js";
 import {
@@ -35,6 +34,8 @@ function onErrorHandler(error, request, response) {
     cause: error,
   });
 
+  console.error(publicErrorObject);
+
   response.status(publicErrorObject.statusCode).json(publicErrorObject);
 }
 
@@ -60,15 +61,6 @@ async function clearSessionCookie(response) {
   response.setHeader("Set-Cookie", setCookie);
 }
 
-async function injectAnonymousOrUser(request, response, next) {
-  if (request.cookies?.session_id) {
-    await injectAuthenticatedUser(request);
-    return next();
-  }
-  injectAnonymousUser(request);
-  return next();
-}
-
 async function injectAuthenticatedUser(request) {
   const sessionToken = request.cookies.session_id;
   const sessionObject = await session.findOneValidByToken(sessionToken);
@@ -78,6 +70,15 @@ async function injectAuthenticatedUser(request) {
     ...request.context,
     user: userObject,
   };
+}
+
+async function injectAnonymousOrUser(request, response, next) {
+  if (request.cookies?.session_id) {
+    await injectAuthenticatedUser(request);
+    return next();
+  }
+  injectAnonymousUser(request);
+  return next();
 }
 
 function injectAnonymousUser(request) {
