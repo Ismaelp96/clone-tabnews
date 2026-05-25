@@ -26,7 +26,7 @@ export class ServiceError extends Error {
     this.name = "ServiceError";
     this.action = action || "Verifique se o serviço está disponível.";
     this.statusCode = 503;
-    TouchList.context = context;
+    this.context = context;
   }
 
   toJSON() {
