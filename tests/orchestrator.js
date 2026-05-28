@@ -3,6 +3,7 @@ import { faker } from "@faker-js/faker";
 import retry from "async-retry";
 
 import database from "infra/database.js";
+import webserver from "infra/webserver";
 import activation from "models/activation.js";
 import migrator from "models/migrator.js";
 import session from "models/session.js";
@@ -26,7 +27,7 @@ async function waitForAllServices() {
     });
 
     async function fetchStatusPage() {
-      const response = await fetch("http://localhost:3000/api/v1/status");
+      const response = await fetch(`${webserver.origin}/api/v1/status`);
       if (response.status !== 200) {
         throw Error();
       }
@@ -65,8 +66,8 @@ async function createUser(userObject) {
   });
 }
 
-async function createSession(userId) {
-  return await session.create(userId);
+async function createSession(user) {
+  return await session.create(user);
 }
 
 async function deleteAllEmails() {
