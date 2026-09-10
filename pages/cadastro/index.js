@@ -12,7 +12,7 @@ export default function RegisterPage() {
         description: "Crie sua conta de forma gratuita.",
       }}
     >
-      <Stack gap="spacious">
+      <Stack gap="spacious" >
         <Heading as="h1">Cadastro</Heading>
         <RegisterForm />
       </Stack>
@@ -47,7 +47,7 @@ function RegisterForm() {
         <FormControl>
           <FormControl.Label>Nome de usuário</FormControl.Label>
           <TextInput
-            type="text"
+            type='text'
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             block
