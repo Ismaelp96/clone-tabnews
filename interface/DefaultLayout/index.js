@@ -3,7 +3,7 @@ import { PageLayout, Header, Text } from "@primer/react";
 
 import styles from "./index.module.css";
 
-const contentWidthClass = {
+const contentWidthClasses = {
   small: styles.smallContent,
 };
 
@@ -12,7 +12,7 @@ export default function DefaultLayout({
   metadata = {},
   contentWidth,
 }) {
-  const extraContentClassName = contentWidthClass[contentWidth];
+  const extraContentClassName = contentWidthClasses[contentWidth];
   return (
     <>
       <Head>

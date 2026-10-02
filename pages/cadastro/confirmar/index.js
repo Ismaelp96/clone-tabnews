@@ -1,8 +1,7 @@
-import DefaultLayout from "../../../interface/DefaultLayout";
-
 import { Banner } from "@primer/react";
+import DefaultLayout from "interface/DefaultLayout";
 
-export function ConfirmRegisterPage() {
+export default function ConfirmRegisterPage() {
   return (
     <DefaultLayout
       contentWidth="small"

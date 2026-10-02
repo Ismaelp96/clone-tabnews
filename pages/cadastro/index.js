@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, TextInput, Stack, FormControl, Heading } from "@primer/react";
 
-import DefaultLayout from "../../interface/DefaultLayout";
+import DefaultLayout from "interface/DefaultLayout";
 
 export default function RegisterPage() {
   return (
@@ -43,7 +43,7 @@ function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Stack gap="spacious">
+      <Stack gap="normal">
         <FormControl>
           <FormControl.Label>Nome de usuário</FormControl.Label>
           <TextInput
@@ -71,9 +71,11 @@ function RegisterForm() {
             block
           />
         </FormControl>
-        <Button type="submit" variant="primary">
-          Criar cadastro
-        </Button>
+        <Stack.Item>
+          <Button type="submit" variant="primary">
+            Criar cadastro
+          </Button>
+        </Stack.Item>
       </Stack>
     </form>
   );
