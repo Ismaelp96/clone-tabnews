@@ -1,6 +1,5 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { Banner } from "@primer/react";
 
 import DefaultLayout from "interface/DefaultLayout";
 import BannerInfo from "components/BannerInfo";
