@@ -1,7 +1,7 @@
 import Head from "next/head";
-import { PageLayout, Header, Text } from "@primer/react";
 
 import styles from "./index.module.css";
+import { Header, PageLayout, Text } from "@primer/react";
 
 const contentWidthClasses = {
   small: styles.smallContent,
