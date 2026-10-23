@@ -27,20 +27,18 @@ function DatabaseStatus() {
     refreshInterval: 2000,
   });
 
-  
-  if(error) {
+  if (error) {
     return (
       <banner>
         <Banner.Title>Erro ao carregar dados.</Banner.Title>
         <Banner.Description>{error.message}</Banner.Description>
       </banner>
-    )
+    );
   }
 
   if (isLoading || !data) {
     return;
   }
-
 
   const database = data.dependencies.database;
   const openedConnections = database.opened_connections;
@@ -53,28 +51,27 @@ function DatabaseStatus() {
         Database
       </Heading>
       <Stack direction={{ narrow: "vertical", regular: "horizontal" }}>
-       <Stack.Item grow>
-         <Card>
-          <Card.Heading>Conexões Abertas</Card.Heading>
-          <Card.Description>{openedConnections}</Card.Description>
-          <Card.Metadata>Uso neste instante</Card.Metadata>
-        </Card>
-       </Stack.Item>
         <Stack.Item grow>
-         <Card>
-          <Card.Heading>Conexões máximas</Card.Heading>
-          <Card.Description>{maxConnections}</Card.Description>
-          <Card.Metadata>Conexões disponíveis</Card.Metadata>
-        </Card>
-       </Stack.Item>
-      <Stack.Item grow>
           <Card>
-          <Card.Heading>PostgreSQL</Card.Heading>
-          <Card.Description>{databaseVersion}</Card.Description>
-          <Card.Metadata>Versão em execução</Card.Metadata>
-        </Card>
-      </Stack.Item>
-      
+            <Card.Heading>Conexões Abertas</Card.Heading>
+            <Card.Description>{openedConnections}</Card.Description>
+            <Card.Metadata>Uso neste instante</Card.Metadata>
+          </Card>
+        </Stack.Item>
+        <Stack.Item grow>
+          <Card>
+            <Card.Heading>Conexões máximas</Card.Heading>
+            <Card.Description>{maxConnections}</Card.Description>
+            <Card.Metadata>Conexões disponíveis</Card.Metadata>
+          </Card>
+        </Stack.Item>
+        <Stack.Item grow>
+          <Card>
+            <Card.Heading>PostgreSQL</Card.Heading>
+            <Card.Description>{databaseVersion}</Card.Description>
+            <Card.Metadata>Versão em execução</Card.Metadata>
+          </Card>
+        </Stack.Item>
       </Stack>
     </Stack>
   );
